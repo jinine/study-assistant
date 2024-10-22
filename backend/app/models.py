@@ -37,12 +37,14 @@ class StudyMaterial(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     def to_dict(self):
         return {
             "id": self.id,
             "title": self.title,
             "description": self.description
+
         }
 
 class StudyProgress(db.Model):
