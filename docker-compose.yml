@@ -1,0 +1,41 @@
+version: '3.9'
+
+services:
+  # Flask Backend Service
+  flask-backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    env_file: .env
+    depends_on:
+      - postgres
+
+  # React Frontend Service
+  react-frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - flask-backend
+      - rust-backend
+
+  # Rust Backend Service
+  rust-backend:
+    build: ./rust_backend
+    ports:
+      - "8080:8080"
+
+  # Postgres Database
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
