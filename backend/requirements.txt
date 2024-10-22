@@ -1,4 +1,7 @@
-Flask
-SQLAlchemy
+flask
+flask_sqlalchemy
+flask_migrate
 transformers
 torch
+psycopg2-binary  # PostgreSQL driver for Python
+python-dotenv
