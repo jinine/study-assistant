@@ -1,0 +1,83 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: postgres:15
+        env:
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
+        ports:
+          - 5432:5432
+        volumes:
+          - postgres_data:/var/lib/postgresql/data
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          docker build -t your-react-frontend-image .
+
+      - name: Build backend
+        run: |
+          cd backend
+          docker build -t your-python-backend-image .
+
+      - name: Build Rust backend
+        run: |
+          cd rust_backend
+          docker build -t your-rust-backend-image .
+
+      - name: Run tests
+        run: |
+          # Run tests for frontend
+          cd frontend
+          npm install
+          npm test -- --watchAll=false
+          
+          # Run tests for Python backend
+          cd ../backend
+          pip install -r requirements.txt
+          pytest
+
+          # Run tests for Rust backend
+          cd ../rust_backend
+          cargo test
+
+      - name: Push Docker images
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker push your-react-frontend-image
+          docker push your-python-backend-image
+          docker push your-rust-backend-image
+
+      - name: Deploy with Terraform
+        env:
+          TF_VAR_db_user: ${{ secrets.DB_USER }}
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+          TF_VAR_db_name: ${{ secrets.DB_NAME }}
+        run: |
+          cd terraform
+          terraform init
+          terraform apply -auto-approve
+
+volumes:
+  postgres_data:
