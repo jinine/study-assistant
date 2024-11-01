@@ -20,10 +20,10 @@ services:
       - rust-backend
 
   # Rust Backend Service
-  rust-backend:
-    build: ./rust_backend
-    ports:
-      - "8080:8080"
+  # rust-backend:
+  #   build: ./rust_backend
+  #   ports:
+  #     - "8080:8080"
 
   # Postgres Database
   postgres:

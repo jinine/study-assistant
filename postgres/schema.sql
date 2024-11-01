@@ -18,6 +18,7 @@ CREATE TABLE study_materials (
     title VARCHAR NOT NULL,          -- Title of the study material
     description VARCHAR NOT NULL      -- Description of the study material
 );
+
 -- Create StudyProgress table
 CREATE TABLE study_progress (
     id SERIAL PRIMARY KEY,
