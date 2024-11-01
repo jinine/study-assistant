@@ -40,7 +40,38 @@ void handle_request(int client_socket) {
                 "Post received!";
             send(client_socket, response, strlen(response), 0);
         }
-        // If neither GET nor POST
+        // Check for PUT request
+        else if (strncmp(buffer, "PUT", 3) == 0) {
+            const char* response =
+                "HTTP/1.1 200 OK\r\n"
+                "Content-Type: text/plain\r\n"
+                "Content-Length: 23\r\n"
+                "Connection: close\r\n"
+                "\r\n"
+                "PUT received!";
+            send(client_socket, response, strlen(response), 0);
+        }
+        else if (strncmp(buffer, "PATCH", 5) == 0) {
+            const char* response =
+                "HTTP/1.1 200 OK\r\n"
+                "Content-Type: text/plain\r\n"
+                "Content-Length: 23\r\n"
+                "Connection: close\r\n"
+                "\r\n"
+                "PATCH received!";
+            send(client_socket, response, strlen(response), 0);
+        }
+        else if (strncmp(buffer, "DELETE", 6) == 0) {
+            const char* response =
+                "HTTP/1.1 200 OK\r\n"
+                "Content-Type: text/plain\r\n"
+                "Content-Length: 23\r\n"
+                "Connection: close\r\n"
+                "\r\n"
+                "DELETE received!";
+            send(client_socket, response, strlen(response), 0);
+        }
+        // If not GET nor POST nor PATCH nor PUT nor DELETE
         else {
             const char* response =
                 "HTTP/1.1 400 Bad Request\r\n"
