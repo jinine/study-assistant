@@ -1,0 +1,1 @@
+this repository is for infrastructure, db scripts, documentation and resources for the smart-study-assistant project.
