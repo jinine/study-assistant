@@ -1,10 +1,7 @@
 from transformers import pipeline
 
-
 def summarize_text(text: str) -> str:
-    # Load the summarization model
     summarizer = pipeline("summarization")
-    # Generate summary
     summary = summarizer(text, max_length=130, min_length=30, do_sample=False)
     return summary[0]['summary_text']
 
@@ -32,7 +29,6 @@ def predict_masked_word(text: str) -> list:
     unmasker = pipeline("fill-mask")
     result = unmasker(text)
     return result
-
 
 def paraphrase_text(text: str) -> str:
     paraphraser = pipeline("text2text-generation", model="t5-small")

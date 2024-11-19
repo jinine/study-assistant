@@ -1,10 +1,6 @@
 from flask import Flask
 from app.routes import register_routes
 import os
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
 
 app = Flask(__name__)
 
