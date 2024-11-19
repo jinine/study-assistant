@@ -8,126 +8,89 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgres
 db.init_app(app)
 
 def register_routes(app: Flask):
-    # User Routes
-    @app.route('/api/users', methods=['POST'])
-    def create_user():
+    
+    @app.route('/api/summarize', methods=['POST'])
+    def summarize():
         data = request.get_json()
-        user = User(**data)
-        db.session.add(user)
-        db.session.commit()
-        return jsonify(user.to_dict()), 201
+        text = data.get('text')
+        if text:
+            summary = summarize_text(text)
+            return jsonify({"summary": summary}), 200
+        return jsonify({"error": "No text provided"}), 400
 
-    @app.route('/api/users/<int:user_id>', methods=['GET'])
-    def get_user(user_id):
-        user = User.query.get_or_404(user_id)
-        return jsonify(user.to_dict())
 
-    @app.route('/api/users/<int:user_id>', methods=['PUT'])
-    def update_user(user_id):
-        user = User.query.get_or_404(user_id)
+    @app.route('/api/entities', methods=['POST'])
+    def entities():
         data = request.get_json()
-        for key, value in data.items():
-            setattr(user, key, value)
-        db.session.commit()
-        return jsonify(user.to_dict())
+        text = data.get('text')
+        if text:
+            entities = extract_entities(text)
+            return jsonify({"entities": entities}), 200
+        return jsonify({"error": "No text provided"}), 400
 
-    @app.route('/api/users/<int:user_id>', methods=['DELETE'])
-    def delete_user(user_id):
-        user = User.query.get_or_404(user_id)
-        db.session.delete(user)
-        db.session.commit()
-        return jsonify({"message": "User deleted"}), 204
 
-    # Study Material Routes
-    @app.route('/api/study_materials', methods=['POST'])
-    def create_study_material():
+    @app.route('/api/classify', methods=['POST'])
+    def classify():
         data = request.get_json()
-        material = StudyMaterial(**data)
-        db.session.add(material)
-        db.session.commit()
-        return jsonify(material.to_dict()), 201
+        text = data.get('text')
+        candidate_labels = data.get('candidate_labels')
+        if text and candidate_labels:
+            classification = classify_text(text, candidate_labels)
+            return jsonify({"classification": classification}), 200
+        return jsonify({"error": "Text or candidate_labels missing"}), 400
 
-    @app.route('/api/study_materials', methods=['GET'])
-    def get_all_study_materials():
-        materials = StudyMaterial.query.all()
-        return jsonify([material.to_dict() for material in materials])
 
-    @app.route('/api/study_materials/<int:material_id>', methods=['GET'])
-    def get_study_material(material_id):
-        material = StudyMaterial.query.get_or_404(material_id)
-        return jsonify(material.to_dict())
-
-    @app.route('/api/study_materials/<int:material_id>', methods=['PUT'])
-    def update_study_material(material_id):
-        material = StudyMaterial.query.get_or_404(material_id)
+    @app.route('/api/qa', methods=['POST'])
+    def qa():
         data = request.get_json()
-        for key, value in data.items():
-            setattr(material, key, value)
-        db.session.commit()
-        return jsonify(material.to_dict())
+        context = data.get('context')
+        question = data.get('question')
+        if context and question:
+            answer = answer_question(context, question)
+            return jsonify({"answer": answer}), 200
+        return jsonify({"error": "Context or question missing"}), 400
 
-    @app.route('/api/study_materials/<int:material_id>', methods=['DELETE'])
-    def delete_study_material(material_id):
-        material = StudyMaterial.query.get_or_404(material_id)
-        db.session.delete(material)
-        db.session.commit()
-        return jsonify({"message": "Study material deleted"}), 204
 
-    # Study Progress Routes
-    @app.route('/api/study_progress', methods=['POST'])
-    def create_study_progress():
+    @app.route('/api/generate', methods=['POST'])
+    def generate():
         data = request.get_json()
-        progress = StudyProgress(**data)
-        db.session.add(progress)
-        db.session.commit()
-        return jsonify(progress.to_dict()), 201
+        prompt = data.get('prompt')
+        if prompt:
+            generated_text = generate_text(prompt)
+            return jsonify({"generated_text": generated_text}), 200
+        return jsonify({"error": "No prompt provided"}), 400
 
-    @app.route('/api/study_progress/user/<int:user_id>', methods=['GET'])
-    def get_study_progress_by_user(user_id):
-        progress = StudyProgress.query.filter_by(user_id=user_id).all()
-        return jsonify([p.to_dict() for p in progress])
 
-    # Quiz Routes
-    @app.route('/api/quizzes', methods=['POST'])
-    def create_quiz():
+    @app.route('/api/fill-mask', methods=['POST'])
+    def fill_mask():
         data = request.get_json()
-        quiz = Quiz(**data)
-        db.session.add(quiz)
-        db.session.commit()
-        return jsonify(quiz.to_dict()), 201
+        text = data.get('text')
+        if text:
+            result = predict_masked_word(text)
+            return jsonify({"result": result}), 200
+        return jsonify({"error": "No text provided"}), 400
 
-    @app.route('/api/quizzes/material/<int:material_id>', methods=['GET'])
-    def get_quizzes_for_material(material_id):
-        quizzes = Quiz.query.filter_by(study_material_id=material_id).all()
-        return jsonify([quiz.to_dict() for quiz in quizzes])
 
-    @app.route('/api/quizzes/<int:quiz_id>', methods=['GET'])
-    def get_quiz(quiz_id):
-        quiz = Quiz.query.get_or_404(quiz_id)
-        return jsonify(quiz.to_dict())
-
-    @app.route('/api/quizzes/<int:quiz_id>/questions', methods=['POST'])
-    def add_question_to_quiz(quiz_id):
-        quiz = Quiz.query.get_or_404(quiz_id)
+    @app.route('/api/paraphrase', methods=['POST'])
+    def paraphrase():
         data = request.get_json()
-        question = QuizQuestion(quiz_id=quiz.id, **data)
-        db.session.add(question)
-        db.session.commit()
-        return jsonify(question.to_dict()), 201
+        text = data.get('text')
+        if text:
+            paraphrased_text = paraphrase_text(text)
+            return jsonify({"paraphrased_text": paraphrased_text}), 200
+        return jsonify({"error": "No text provided"}), 400
 
-    # Study Notification Routes
-    @app.route('/api/study_notifications', methods=['POST'])
-    def create_study_notification():
+
+    @app.route('/api/summarize_and_classify', methods=['POST'])
+    def summarize_and_classify_route():
         data = request.get_json()
-        notification = StudyNotification(**data)
-        db.session.add(notification)
-        db.session.commit()
-        return jsonify(notification.to_dict()), 201
+        text = data.get('text')
+        candidate_labels = data.get('candidate_labels')
+        if text and candidate_labels:
+            result = summarize_and_classify(text, candidate_labels)
+            return jsonify(result), 200
+        return jsonify({"error": "Text or candidate_labels missing"}), 400
 
-    @app.route('/api/study_notifications/user/<int:user_id>', methods=['GET'])
-    def get_notifications_for_user(user_id):
-        notifications = StudyNotification.query.filter_by(user_id=user_id).all()
-        return jsonify([n.to_dict() for n in notifications])
 
     if __name__ == '__main__':
         app.run(debug=True)
