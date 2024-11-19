@@ -1,9 +1,10 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from app.models import db, User, StudyMaterial, StudyProgress, Quiz, QuizQuestion, StudyNotification
+import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@127.0.0.1:5432/smart-study'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://postgres:password@127.0.0.1:5432/smart-study')
 db.init_app(app)
 
 def register_routes(app: Flask):
