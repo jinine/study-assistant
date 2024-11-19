@@ -8,10 +8,6 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Configurations
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 # Register routes
 register_routes(app)
 
