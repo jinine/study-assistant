@@ -4,3 +4,4 @@ transformers
 torch
 psycopg2-binary  # PostgreSQL driver for Python
 python-dotenv
+flask_cors
